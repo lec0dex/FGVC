@@ -92,6 +92,9 @@ def gradient_mask(mask):
 
     return gradient_mask
 
+def binary_fill_holes(mask):
+    filled_holes = scipy.ndimage.binary_fill_holes(mask).astype(np.bool)
+    return mask if (filled_holes == 1).all() else filled_holes
 
 def flow_edge(flow, mask=None):
     # mask: 1 indicates the missing region

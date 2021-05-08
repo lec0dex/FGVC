@@ -1,7 +1,6 @@
 # [ECCV 2020] Flow-edge Guided Video Completion
 
-### [[Paper](https://arxiv.org/abs/2009.01835)] [[Project Website](http://chengao.vision/FGVC/)] [[Google Colab](https://colab.research.google.com/drive/1pb6FjWdwq_q445rG2NP0dubw7LKNUkqc?usp=sharing)]
-
+### [[Original code](https://github.com/vt-vl-lab/FGVC)]
 <p align='center'>
 <img src='http://chengao.vision/FGVC/files/FGVC_teaser.png' width='900'/>
 </p>
@@ -14,6 +13,10 @@ We present a new flow-based video completion algorithm. Previous flow completion
 [Chen Gao](http://chengao.vision), [Ayush Saraf](#), [Jia-Bin Huang](https://filebox.ece.vt.edu/~jbhuang/), and [Johannes Kopf](https://johanneskopf.de/)
 <br/>
 In European Conference on Computer Vision (ECCV), 2020
+
+## Ray and Zarr implementation
+
+The original code allocates all frames into GPU memory, which may limit the use only on expensive hardware. To alleviate that, the code was tweaked and features added, like Ray for multiprocessing and Zarr for storage. Depending on how many frames are, this code may use a good amount of RAM in video completion due to unoptimized flowNN process. A per batch frame processing was implemented to get around that, but Consider it as experimental, as it may produce unexpected results.
 
 ## Prerequisites
 
@@ -41,44 +44,47 @@ and the Python dependencies listed in requirements.txt
 
 ## Quick start
 
+First step: Create flow, process mask and gradients
+
 - Object removal:
 ```bash
-cd tool
-python video_completion.py \
+python 1-create-flow.py \
        --mode object_removal \
-       --path ../data/tennis \
-       --path_mask ../data/tennis_mask \
-       --outroot ../result/tennis_removal \
-       --seamless
+       --path ./data/tennis \
+       --path_mask ./data/tennis_mask \
+       --outroot ./result/tennis_removal \
 ```
 
 - FOV extrapolation:
 ```bash
-cd tool
-python video_completion.py \
+python 1-create-flow.py \
        --mode video_extrapolation \
-       --path ../data/tennis \
-       --outroot ../result/tennis_extrapolation \
+       --path ./data/tennis \
+       --outroot ./result/tennis_extrapolation \
        --H_scale 2 \
        --W_scale 2 \
-       --seamless
 ```
 
-You can remove the `--seamless` flag for a faster processing time.
+Second step: Video completion
+```bash
+python 2-video-completion.py \
+       --outroot ./result/tennis_extrapolation \
+```
 
 
 ## License
 This work is licensed under MIT License. See [LICENSE](LICENSE) for details.
 
-If you find this code useful for your research, please consider citing the following paper:
-
-	@inproceedings{Gao-ECCV-FGVC,
-	    author    = {Gao, Chen and Saraf, Ayush and Huang, Jia-Bin and Kopf, Johannes},
-	    title     = {Flow-edge Guided Video Completion},
-	    booktitle = {European Conference on Computer Vision},
-	    year      = {2020}
-	}
-
 ## Acknowledgments
+- Paper and original code are from [Gao-ECCV-FGVC](https://github.com/vt-vl-lab/FGVC)
+  If you find this code useful for your research, please consider citing the following paper:
+
+    @article{Gao-ECCV-FGVC,
+        author    = {Gao, Chen and Saraf, Ayush and Huang, Jia-Bin and Kopf, Johannes},
+        title     = {Flow-edge Guided Video Completion},
+        booktitle = {European Conference on Computer Vision},
+        year      = {2020}
+    }
+
 - Our flow edge completion network builds upon [EdgeConnect](https://github.com/knazeri/edge-connect).
 - Our image inpainting network is modified from [DFVI](https://github.com/nbei/Deep-Flow-Guided-Video-Inpainting).
